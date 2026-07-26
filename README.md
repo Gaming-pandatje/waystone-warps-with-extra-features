@@ -13,6 +13,7 @@ I added a co-owner menu (emerald icon). This menu allow you to give other player
 <img width="486" height="329" alt="Screenshot 2026-06-14 210022" src="https://github.com/user-attachments/assets/7bc9960b-0e03-4e0d-9e45-454c8b1b3ccb" />
 
 In version 1.1 a new notification feature got added. If you turn this on in your waystone settings, you get a notification in chat when someone uses your waystone or discovers your waystone.
+
 <img width="813" height="384" alt="Screenshot 2026-07-26 192323" src="https://github.com/user-attachments/assets/0423fc85-4ce2-42fe-9d11-fa986c72e564" />
 
 ## new Permissions
