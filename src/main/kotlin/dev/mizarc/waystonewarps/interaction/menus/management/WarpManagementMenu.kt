@@ -8,7 +8,9 @@ import dev.mizarc.waystonewarps.application.actions.discovery.GetWarpPlayerAcces
 import dev.mizarc.waystonewarps.application.actions.groups.GetAllWarpGroups
 import dev.mizarc.waystonewarps.application.actions.coowner.GetCoOwners
 import dev.mizarc.waystonewarps.application.actions.management.ToggleLock
+import dev.mizarc.waystonewarps.application.actions.notifications.ToggleWarpNotification
 import dev.mizarc.waystonewarps.application.services.ConfigService
+import dev.mizarc.waystonewarps.domain.notifications.WarpNotificationRepository
 import dev.mizarc.waystonewarps.domain.warps.Warp
 import dev.mizarc.waystonewarps.domain.warps.WarpAccess
 import dev.mizarc.waystonewarps.interaction.localization.LocalizationKeys
@@ -37,6 +39,8 @@ class WarpManagementMenu(private val player: Player, private val menuNavigator: 
     private val getCoOwners: GetCoOwners by inject()
     private val toggleLock: ToggleLock by inject()
     private val getAllWarpGroups: GetAllWarpGroups by inject()
+    private val toggleWarpNotification: ToggleWarpNotification by inject()
+    private val warpNotificationRepository: WarpNotificationRepository by inject()
     private val localizationProvider: LocalizationProvider by inject()
     private val configService: ConfigService by inject()
 
@@ -267,6 +271,35 @@ class WarpManagementMenu(private val player: Player, private val menuNavigator: 
             }
         }
         pane.addItem(guiMoveItem, 8, 0)
+
+        // Add notification toggle button (slot 7) — visible to owner and co-owners
+        val isOwnerOrCoOwner = player.uniqueId == warp.playerId || coOwnerIds.contains(player.uniqueId)
+        if (isOwnerOrCoOwner) {
+            val notificationsEnabled = warpNotificationRepository.isEnabled(warp.id, player.uniqueId)
+            val notificationItem = if (notificationsEnabled) {
+                ItemStack(Material.OAK_SIGN)
+                    .name("Waystone Notifications")
+                    .lore(
+                        "You will be notified when someone",
+                        "uses, teleports to, or discovers",
+                        "this waystone.",
+                        "§eClick to disable."
+                    )
+            } else {
+                ItemStack(Material.BARRIER)
+                    .name("Waystone Notifications")
+                    .lore(
+                        "You will NOT be notified about",
+                        "activity on this waystone.",
+                        "§eClick to enable."
+                    )
+            }
+            val guiNotificationItem = GuiItem(notificationItem) {
+                toggleWarpNotification.execute(warp.id, player.uniqueId)
+                open()
+            }
+            pane.addItem(guiNotificationItem, 7, 0)
+        }
 
         gui.show(player)
     }

@@ -36,6 +36,9 @@ import dev.mizarc.waystonewarps.application.actions.coowner.ToggleCoOwner
 import dev.mizarc.waystonewarps.application.actions.coowner.GetCoOwners
 import dev.mizarc.waystonewarps.domain.coowner.CoOwnerRepository
 import dev.mizarc.waystonewarps.infrastructure.persistence.coowner.CoOwnerRepositorySQLite
+import dev.mizarc.waystonewarps.application.actions.notifications.ToggleWarpNotification
+import dev.mizarc.waystonewarps.domain.notifications.WarpNotificationRepository
+import dev.mizarc.waystonewarps.infrastructure.persistence.notifications.WarpNotificationRepositorySQLite
 import dev.mizarc.waystonewarps.application.actions.world.AddAllDisplays
 import dev.mizarc.waystonewarps.application.actions.world.IsPositionInTeleportZone
 import dev.mizarc.waystonewarps.application.actions.world.IsValidWarpBase
@@ -65,6 +68,7 @@ import dev.mizarc.waystonewarps.infrastructure.persistence.migrations.Migration1
 import dev.mizarc.waystonewarps.infrastructure.persistence.migrations.Migration2_AddWarpAccessLevel
 import dev.mizarc.waystonewarps.infrastructure.persistence.migrations.Migration3_AddWarpGroups
 import dev.mizarc.waystonewarps.infrastructure.persistence.migrations.Migration4_AddCoOwners
+import dev.mizarc.waystonewarps.infrastructure.persistence.migrations.Migration5_AddWarpNotifications
 import dev.mizarc.waystonewarps.infrastructure.persistence.migrations.SchemaMigrator
 import dev.mizarc.waystonewarps.infrastructure.persistence.storage.SQLiteStorage
 import dev.mizarc.waystonewarps.infrastructure.persistence.storage.Storage
@@ -116,6 +120,7 @@ class WaystoneWarps: JavaPlugin() {
     private lateinit var whitelistRepository: WhitelistRepository
     private lateinit var warpGroupRepository: WarpGroupRepository
     private lateinit var coOwnerRepository: CoOwnerRepository
+    private lateinit var warpNotificationRepository: WarpNotificationRepository
 
     // Services
     private lateinit var movementMonitorService: MovementMonitorService
@@ -149,6 +154,7 @@ class WaystoneWarps: JavaPlugin() {
                     Migration2_AddWarpAccessLevel(),
                     Migration3_AddWarpGroups(),
                     Migration4_AddCoOwners(),
+                    Migration5_AddWarpNotifications(),
                 ),
             ).migrateToLatest()
         } catch (ex: Exception) {
@@ -250,6 +256,7 @@ class WaystoneWarps: JavaPlugin() {
         whitelistRepository = WhitelistRepositorySQLite(storage)
         warpGroupRepository = WarpGroupRepositorySQLite(storage)
         coOwnerRepository = CoOwnerRepositorySQLite(storage)
+        warpNotificationRepository = WarpNotificationRepositorySQLite(storage)
     }
 
     private fun initialiseServices() {
@@ -297,6 +304,7 @@ class WaystoneWarps: JavaPlugin() {
             single<WhitelistRepository> { whitelistRepository }
             single<WarpGroupRepository> { warpGroupRepository }
             single<CoOwnerRepository> { coOwnerRepository }
+            single<WarpNotificationRepository> { warpNotificationRepository }
             single<ConfigService> { configService }
             single<TeleportationService> { teleportationService }
             single<WarpEventPublisher> { warpEventPublisher }
@@ -313,7 +321,8 @@ class WaystoneWarps: JavaPlugin() {
             single { UpdateWarpName(warpRepository, hologramService, warpEventPublisher) }
             single { GetWarpAtPosition(warpRepository) }
             single { BreakWarpBlock(warpRepository, structureBuilderService,
-                discoveryRepository, whitelistRepository, structureParticleService, hologramService, warpEventPublisher) }
+                discoveryRepository, whitelistRepository, structureParticleService, hologramService, warpEventPublisher,
+                warpNotificationRepository) }
             single { TeleportPlayerImmediately(teleportationService) }
             single { TeleportPlayer(teleportationService, playerAttributeService, playerParticleService, playerCountdownService,
                 discoveryRepository, warpEventPublisher, get(), playerStateRepository)}
@@ -324,6 +333,7 @@ class WaystoneWarps: JavaPlugin() {
             single { GetWhitelistedPlayers(whitelistRepository) }
             single { ToggleCoOwner(coOwnerRepository, warpRepository) }
             single { GetCoOwners(coOwnerRepository) }
+            single { ToggleWarpNotification(warpNotificationRepository) }
             single { ToggleWhitelist(whitelistRepository, warpRepository) }
             single { RevokeDiscovery(discoveryRepository) }
             single { IsPositionInTeleportZone(warpRepository) }
@@ -370,5 +380,9 @@ class WaystoneWarps: JavaPlugin() {
         server.pluginManager.registerEvents(TeleportZoneProtectionListener(), this)
         server.pluginManager.registerEvents(WarpItemListener(configService), this)
         server.pluginManager.registerEvents(WaystoneBaseInteractListener(), this)
+        server.pluginManager.registerEvents(
+            WarpNotificationListener(warpNotificationRepository, coOwnerRepository, warpRepository),
+            this
+        )
     }
 }

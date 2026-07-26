@@ -58,6 +58,8 @@ class SchemaMigrator(
         }
 
         return when {
+            hasTable("warp_notifications") -> 5
+            hasTable("co_owners") -> 4
             hasColumn("warps", "groupId") -> 3
             hasColumn("warps", "accessLevel") -> 2
             hasColumn("warps", "iconMeta") -> 1

@@ -6,6 +6,7 @@ import dev.mizarc.waystonewarps.application.services.StructureBuilderService
 import dev.mizarc.waystonewarps.application.services.StructureParticleService
 import dev.mizarc.waystonewarps.application.services.WarpEventPublisher
 import dev.mizarc.waystonewarps.domain.discoveries.DiscoveryRepository
+import dev.mizarc.waystonewarps.domain.notifications.WarpNotificationRepository
 import dev.mizarc.waystonewarps.domain.positioning.Position3D
 import dev.mizarc.waystonewarps.domain.warps.WarpRepository
 import dev.mizarc.waystonewarps.domain.whitelist.WhitelistRepository
@@ -18,7 +19,8 @@ class BreakWarpBlock(
     private val whitelistRepository: WhitelistRepository,
     private val structureParticleService: StructureParticleService,
     private val hologramService: HologramService,
-    private val warpEventPublisher: WarpEventPublisher
+    private val warpEventPublisher: WarpEventPublisher,
+    private val warpNotificationRepository: WarpNotificationRepository? = null
 ) {
     fun execute(position: Position3D, worldId: UUID): BreakWarpResult  {
         val warp = warpRepository.getByPosition(position, worldId) ?: return BreakWarpResult.WarpNotFound
@@ -42,6 +44,9 @@ class BreakWarpBlock(
         
         // Remove all whitelist entries for this warp
         whitelistRepository.removeByWarp(warp.id)
+
+        // Remove all notification settings for this warp
+        warpNotificationRepository?.removeByWarp(warp.id)
         
         structureBuilderService.revertStructure(warp)
         structureParticleService.removeParticles(warp)

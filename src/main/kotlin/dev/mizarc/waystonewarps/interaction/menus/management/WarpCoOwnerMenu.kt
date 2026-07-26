@@ -159,7 +159,7 @@ class WarpCoOwnerMenu(
                     .build()
                 floodgateApi.sendForm(player.uniqueId, formBuilder)
             } catch (e: Exception) {
-                openChatInput()
+                plugin.logger.warning("Failed to open Bedrock form for ${player.name}: ${e.message}")
             }
         } else {
             menuNavigator.openMenu(PlayerSearchMenu(player, menuNavigator))
