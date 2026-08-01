@@ -20,7 +20,7 @@ In version 1.1 a new notification feature got added. If you turn this on in your
 
 | Permission Node                          | Description |
 |------------------------------------------|-------------|
-| `waystonewarps.assign_group`         | Allows player to change the group of a waystone|
+| `waystonewarps.assign_group`         | permission for players to change the group of a waystone|
 
 ## new commands
 
