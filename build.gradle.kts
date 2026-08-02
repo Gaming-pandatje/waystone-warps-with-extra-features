@@ -52,6 +52,9 @@ repositories {
     maven {
         url = uri("https://repo.opencollab.dev/main/")
     }
+    maven {
+        url = uri("https://mvn.wesjd.net/")
+    }
 }
 
 dependencies {
@@ -60,16 +63,17 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib:2.3.0")
     compileOnly("io.insert-koin:koin-core-jvm:4.1.1")
-    compileOnly("net.luckperms:api:5.4")
     implementation("co.aikar:idb-core:1.0.0-SNAPSHOT")
     implementation("co.aikar:acf-paper:0.5.1-SNAPSHOT")
     compileOnly("com.zaxxer:HikariCP:7.0.2")
     implementation("com.github.stefvanschie.inventoryframework:IF:0.12.0")
+    implementation("net.wesjd:anvilgui:1.10.13-SNAPSHOT")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("me.xdrop:fuzzywuzzy:1.4.0")
     compileOnly("com.palmergames.bukkit.towny:towny:0.102.0.14")
     compileOnly("org.mvplugins.multiverse.inventories:multiverse-inventories:5.3.2")
     compileOnly("org.geysermc.floodgate:api:2.2.2-SNAPSHOT")
+    compileOnly("net.luckperms:api:5.4")
 }
 
 java {
@@ -91,8 +95,14 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks.jar {
+    enabled = false
+}
+
 tasks.shadowJar {
     archiveClassifier = null
+    archiveBaseName = "waystone-warps-with-extra-features"
+    archiveVersion = ""
 }
 
 tasks.processResources {

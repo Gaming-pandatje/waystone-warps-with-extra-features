@@ -1,20 +1,25 @@
 package dev.mizarc.waystonewarps.interaction.menus.use
 
+import dev.mizarc.waystonewarps.interaction.localization.LocalizationKeys
 import dev.mizarc.waystonewarps.interaction.localization.LocalizationProvider
 import dev.mizarc.waystonewarps.interaction.menus.Menu
 import dev.mizarc.waystonewarps.interaction.menus.MenuNavigator
+import dev.mizarc.waystonewarps.interaction.utils.name
+import net.wesjd.anvilgui.AnvilGUI
+import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerChatEvent
+import org.bukkit.inventory.ItemStack
 import org.koin.core.component.KoinComponent
 
 class WarpSearchMenu(
     private val player: Player,
     private val menuNavigator: MenuNavigator,
     private val localizationProvider: LocalizationProvider
-): Menu, KoinComponent {
+) : Menu, KoinComponent {
     private val plugin = org.bukkit.Bukkit.getPluginManager().getPlugin("WaystoneWarps")!!
 
     private fun isBedrockPlayer(): Boolean {
@@ -24,7 +29,7 @@ class WarpSearchMenu(
     }
 
     override fun open() {
-        if (isBedrockPlayer()) openBedrockForm() else openChatInput()
+        if (isBedrockPlayer()) openBedrockForm() else openAnvilGui()
     }
 
     private fun openBedrockForm() {
@@ -44,23 +49,18 @@ class WarpSearchMenu(
         }
     }
 
-    private fun openChatInput() {
-        player.closeInventory()
-        player.sendMessage("§6Type a waystone name to search in chat (or type §ccancel§6 to abort):")
-        val listener = object : Listener {
-            @EventHandler
-            fun onChat(event: AsyncPlayerChatEvent) {
-                if (event.player.uniqueId != player.uniqueId) return
-                event.isCancelled = true
-                HandlerList.unregisterAll(this)
-                val input = event.message.trim()
-                if (input.equals("cancel", ignoreCase = true)) {
-                    plugin.server.scheduler.runTask(plugin, Runnable { menuNavigator.goBack() })
-                    return
-                }
-                plugin.server.scheduler.runTask(plugin, Runnable { menuNavigator.goBackWithData(input) })
+    private fun openAnvilGui() {
+        val lodestoneItem = ItemStack(Material.LODESTONE).name("")
+        AnvilGUI.Builder()
+            .plugin(plugin)
+            .title(localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_SEARCH_TITLE))
+            .itemLeft(lodestoneItem)
+            .onClick { slot, state ->
+                if (slot != AnvilGUI.Slot.OUTPUT) return@onClick listOf()
+                menuNavigator.goBackWithData(state.text.trim())
+                listOf(AnvilGUI.ResponseAction.close())
             }
-        }
-        plugin.server.pluginManager.registerEvents(listener, plugin)
+            .onClose { menuNavigator.goBack() }
+            .open(player)
     }
 }
