@@ -37,14 +37,14 @@ class StructureParticleServiceBukkit(private val plugin: JavaPlugin,
 
                         if (warp.playerId == player.uniqueId) {
                             // Owner particle
-                            player.spawnParticle(Particle.HAPPY_VILLAGER, location, 1, 0.5, 0.5, 0.5)
+                            player.spawnParticle(Particle.HAPPY_VILLAGER, location, 3, 0.3, 0.5, 0.3)
                         } else if (!whitelisted) {
-                            // If player isn't whitelisted, show silent FLAME
-                            player.spawnParticle(Particle.FLAME, location, 1, 0.5, 0.5, 0.5)
+                            // If player isn't whitelisted, show FLAME
+                            player.spawnParticle(Particle.FLAME, location, 3, 0.3, 0.5, 0.3, 0.0)
                         } else {
-                            // If player is whitelisted, show silent WITCH/ENCHANTED_HIT
+                            // If player is whitelisted, show WITCH/ENCHANTED_HIT
                             val particle = if (discovered != null) Particle.WITCH else Particle.ENCHANTED_HIT
-                            player.spawnParticle(particle, location, 1, 0.5, 0.5, 0.5)
+                            player.spawnParticle(particle, location, 3, 0.3, 0.5, 0.3)
                         }
 
                     }
